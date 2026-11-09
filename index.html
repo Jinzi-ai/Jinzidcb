@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#315fcb">
+<meta name="description" content="每日英语单词搜索、释义、发音与复习">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>每日单词本</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Noto Sans CJK SC","Microsoft YaHei",sans-serif;color:#202938;background:#f3f5f9;--blue:#315fcb}
+*{box-sizing:border-box}body{margin:0;padding:calc(17px + env(safe-area-inset-top)) 14px calc(20px + env(safe-area-inset-bottom));}
+.app{max-width:650px;margin:auto;min-height:calc(100dvh - 40px)}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:19px}
+h1{font-size:23px;margin:0}.sub,.muted{color:#7b8493;font-size:13px}
+nav{display:flex;gap:8px;margin-bottom:13px}.tab,button{cursor:pointer;border:1px solid #dce1e9;background:white;border-radius:11px;padding:11px 14px;color:inherit;font:inherit}
+.tab{font-size:14px;flex:1}.tab.active{background:#e8efff;border-color:#8daaf7;color:#244caa;font-weight:650}
+.panel{background:white;border:1px solid #e3e7ee;border-radius:16px;padding:16px;margin-bottom:13px;box-shadow:0 2px 9px #18243a08}
+form{display:flex;gap:8px;margin-top:12px}input{flex:1;min-width:0;padding:13px 12px;border:1px solid #dce1e9;border-radius:11px;font-size:16px;background:#fff;color:#202938}
+.primary{background:var(--blue);color:white;border-color:var(--blue);font-weight:650}
+.stats{display:flex;gap:9px;margin-top:12px}.stat{flex:1;background:#f5f7fb;border-radius:11px;padding:12px}.stat strong{display:block;font-size:23px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px 1px;border-bottom:1px solid #edf0f4}
+.word{font-weight:700;font-size:18px;touch-action:manipulation}.meaning{font-size:14px;color:#657084;margin-top:6px;line-height:1.5}.blur{filter:blur(5px);user-select:none}
+.dates{display:flex;gap:7px;overflow:auto;padding:3px 0 6px}.datebtn{white-space:nowrap;font-size:12px;padding:8px 11px}.datebtn.active{background:#e8efff;border-color:#8daaf7}
+.actions{display:flex;gap:6px}.small{padding:8px 10px;font-size:13px}.hidden{display:none!important}
+#error{color:#b54747;font-size:13px;margin-top:10px;min-height:18px}
+footer{text-align:center;color:#8992a1;font-size:11px;margin:18px 0 8px}
+#install{display:none;background:#eaf1ff;border:1px solid #b9cbff;color:#244caa;width:100%;margin:0 0 12px;font-weight:650}
+#resultWord{font-size:25px;font-weight:750}
+@media(max-width:390px){body{padding-left:10px;padding-right:10px}.panel{padding:14px}form{flex-wrap:wrap}form input{flex-basis:100%}form button{width:100%}}
+</style>
+</head>
+<body><main class="app">
+<header><div><h1>每日单词本</h1><div class="sub">Daily English Vocabulary</div></div><div class="muted" id="today"></div></header>
+<button id="install">＋ 添加到手机桌面</button>
+<nav><button class="tab active" data-page="search">⌕ 单词搜索</button><button class="tab" data-page="book">▤ 每日单词本</button></nav>
+<section id="search">
+<div class="panel"><b>查询英文单词</b><form id="form"><input id="query" placeholder="输入英文单词，例如 apple" autocomplete="off" autocapitalize="none" required><button class="primary" id="searchBtn">搜索</button></form><div class="muted" style="margin-top:9px">查询成功后自动加入今天的单词本</div><div id="error"></div></div>
+<div class="panel hidden" id="result"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><strong id="resultWord"></strong><button id="speakResult">🔊 发音</button></div><div class="muted" style="margin-top:15px">中文释义</div><div id="resultMeaning" style="margin-top:5px;line-height:1.6"></div><div class="muted" style="margin-top:12px" id="saved"></div></div>
+<div class="panel"><b>今天的学习情况</b><div class="stats"><div class="stat"><strong id="todayCount">0</strong><span class="muted">今日单词</span></div><div class="stat"><strong id="totalCount">0</strong><span class="muted">累计单词</span></div></div><button style="width:100%;margin-top:13px" id="toBook">进入今日单词本 →</button></div>
+</section>
+<section id="book" class="hidden">
+<div class="panel"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div><b>学习记录</b><div class="muted" style="margin-top:5px">按日期归档 · 每日 00:00 更新</div></div><button id="reviewToggle" class="small">开启复习模式</button></div><div class="stats"><div class="stat"><strong id="pageCount">0</strong><span class="muted">本页单词</span></div><div class="stat"><strong id="daysCount">0</strong><span class="muted">学习天数</span></div></div></div>
+<div class="panel"><b>日期目录</b><div class="dates" id="dates" style="margin-top:9px"></div></div>
+<div class="panel"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div><b id="bookDate">今日单词</b><div class="muted" id="bookSub" style="margin-top:4px"></div></div><button class="small" id="hideAll">全部隐藏</button></div><div id="words" style="margin-top:8px"></div><div id="empty" class="muted" style="text-align:center;padding:28px 0">这一天还没有搜索过单词</div><div id="tip" class="muted hidden" style="margin-top:12px;line-height:1.5">复习模式：双击（快速连续点按两次）英文单词，显示或隐藏中文释义。</div></div>
+</section>
+<footer>记录保存在本机浏览器 · 同一浏览器打开可继续使用</footer>
+</main>
+<script>
+(()=>{
+const KEY='daily_vocab_dictionary_android_v1';let data={};try{data=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){}
+let selected=day(),review=false,lastWord='',installPrompt=null;
+const $=id=>document.getElementById(id);
+function day(){let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function fmt(d){let p=d.split('-');return p[0]+'年'+(+p[1])+'月'+(+p[2])+'日'}
+function list(d){return Array.isArray(data[d])?data[d]:[]}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){alert('保存失败，请检查手机存储空间。')}}
+function say(w){if(!window.speechSynthesis){alert('当前浏览器不支持语音播放');return}speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(w);u.lang='en-US';u.rate=.88;speechSynthesis.speak(u)}
+function stats(){let total=Object.values(data).reduce((n,a)=>n+(Array.isArray(a)?a.length:0),0);$('todayCount').textContent=list(day()).length;$('totalCount').textContent=total;$('today').textContent=fmt(day())}
+function page(p){$('search').classList.toggle('hidden',p!=='search');$('book').classList.toggle('hidden',p!=='book');document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.page===p));if(p==='book')render()}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>page(b.dataset.page));$('toBook').onclick=()=>page('book');
+function render(){
+stats();let ds=Object.keys(data).filter(k=>Array.isArray(data[k])).sort().reverse();if(!ds.includes(day()))ds.unshift(day());if(!ds.includes(selected))selected=day();
+$('dates').replaceChildren();ds.forEach(d=>{let b=document.createElement('button');b.className='datebtn'+(d===selected?' active':'');b.textContent=d===day()?'今天':d.slice(5);b.title=fmt(d);b.onclick=()=>{selected=d;render()};$('dates').append(b)});
+let a=list(selected);$('bookDate').textContent=fmt(selected);$('bookSub').textContent=a.length+' 个单词';$('pageCount').textContent=a.length;$('daysCount').textContent=Object.keys(data).filter(k=>Array.isArray(data[k])&&data[k].length).length;
+$('empty').classList.toggle('hidden',a.length>0);$('reviewToggle').textContent=review?'退出复习模式':'开启复习模式';$('tip').classList.toggle('hidden',!review);$('words').replaceChildren();
+a.slice().reverse().forEach(item=>{let row=document.createElement('div');row.className='row';let left=document.createElement('div');left.style.flex='1';let w=document.createElement('div');w.className='word';w.textContent=item.word;w.title='快速双击切换释义';
+let lastTap=0;w.addEventListener('click',()=>{if(!review){say(item.word);return}let now=Date.now();if(now-lastTap<450){item.revealed=!item.revealed;render()}lastTap=now});
+let m=document.createElement('div');m.className='meaning'+(review&&!item.revealed?' blur':'');m.textContent=item.meaning||'暂无释义';left.append(w,m);
+let actions=document.createElement('div');actions.className='actions';let s=document.createElement('button');s.className='small';s.textContent='🔊';s.setAttribute('aria-label','播放发音');s.onclick=()=>say(item.word);let del=document.createElement('button');del.className='small';del.textContent='删除';del.onclick=()=>{let i=list(selected).findIndex(x=>x.word===item.word);if(i>=0){list(selected).splice(i,1);save();render()}};actions.append(s,del);row.append(left,actions);$('words').append(row)})
+}
+$('reviewToggle').onclick=()=>{review=!review;list(selected).forEach(x=>x.revealed=false);render()};
+$('hideAll').onclick=()=>{review=true;list(selected).forEach(x=>x.revealed=false);render()};
+$('form').onsubmit=async e=>{e.preventDefault();let word=$('query').value.trim().toLowerCase();if(!/^[a-z]+(?:[-'][a-z]+)*$/.test(word)){$('error').textContent='请输入有效的英文单词。';return}
+$('error').textContent='正在查询中文释义……';$('searchBtn').disabled=true;
+try{let r=await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(word)+'&langpair=en|zh-CN');if(!r.ok)throw Error('网络请求失败');let j=await r.json();let meaning=j.responseData?.translatedText||'';meaning=meaning.replace(/&quot;/g,'"').replace(/&#39;/g,"'");if(!meaning||meaning.toLowerCase()===word)throw Error('没有找到释义，请检查拼写或稍后重试。');
+let d=day();if(!Array.isArray(data[d]))data[d]=[];let old=data[d].find(x=>x.word===word);if(old){old.meaning=meaning;old.revealed=false}else data[d].push({word,meaning,revealed:false});save();lastWord=word;$('result').classList.remove('hidden');$('resultWord').textContent=word;$('resultMeaning').textContent=meaning;$('saved').textContent='已自动保存到 '+fmt(d)+' ✓';$('error').textContent='';stats()
+}catch(err){$('error').textContent=err.message||'查询失败，请检查网络。'}finally{$('searchBtn').disabled=false}};
+$('speakResult').onclick=()=>lastWord&&say(lastWord);
+let active=day();setInterval(()=>{if(day()!==active){active=day();selected=active;stats();if(!$('book').classList.contains('hidden'))render()}},10000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&day()!==active){active=day();selected=active;stats();render()}});
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;$('install').style.display='block'});
+$('install').onclick=async()=>{if(!installPrompt){alert('请使用 Chrome 菜单中的“添加到主屏幕”或“安装应用”。');return}installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;$('install').style.display='none'};
+if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+stats();
+})();
+</script></body></html>
